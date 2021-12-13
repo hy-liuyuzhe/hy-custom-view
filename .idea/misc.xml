@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/layout/activity_draw_mix_mode.xml" value="0.396875" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.30446194225721784" />
       </map>
     </option>

@@ -18,13 +18,11 @@ class DrawRectView @JvmOverloads constructor(
     private lateinit var size: Coordinate.Size
     val coordinate = Coordinate()
 
-    private var pts: java.util.ArrayList<Float>
     private val paint = Paint()
 
 
     init {
         paint.color = Color.RED
-        pts = ArrayList<Float>()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -36,6 +34,42 @@ class DrawRectView @JvmOverloads constructor(
         super.onDraw(canvas)
         coordinate.onDraw(canvas = canvas, size = size)
         canvas.translate((width / 2).toFloat(), (height / 2).toFloat());
+        rect(canvas)
+    }
+
+//    private fun drawPaint(canvas: Canvas) {
+//        val colors = intArrayOf(
+//            Color.parseColor("#F60C0C"),
+//            Color.parseColor("#F3B913"),
+//            Color.parseColor("#E7F716"),
+//            Color.parseColor("#3DF30B"),
+//            Color.parseColor("#0DF6EF"),
+//            Color.parseColor("#0829FB"),
+//            Color.parseColor("#B709F4"),
+//        )
+//        val positions = floatArrayOf(
+//            (1.0 / 7).toFloat(),
+//            (2.0 / 7).toFloat(), (3.0 / 7).toFloat(), (4.0 / 7).toFloat(),
+//            (5.0 / 7).toFloat(), (6.0 / 7).toFloat(), 1.0F
+//        )
+//        val p = Paint()
+//        p.shader = LinearGradient(
+//            -size.width,
+//            0f,
+//            size.width,
+//            0f,
+//            colors,
+//            positions,
+//            Shader.TileMode.CLAMP
+//        )
+//
+//
+////        p.blendMode  = setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+//
+//        canvas.drawPaint(p)
+//    }
+
+    private fun rect(canvas: Canvas) {
         canvas.drawRect(Rect(-80, -80, 80, 80), paint.apply {
             color = Color.BLUE
             strokeWidth = 1.5f
@@ -50,11 +84,5 @@ class DrawRectView @JvmOverloads constructor(
             10f,
             10f,
             paint.apply { color = Color.GREEN })
-
-    }
-
-    fun d(x: Int): Int {
-        val y = -x * x / 200 + 100
-        return y;
     }
 }

@@ -2,6 +2,7 @@ package com.yuwq.hy_learn_draw
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 
 class MainActivity : AppCompatActivity() {
