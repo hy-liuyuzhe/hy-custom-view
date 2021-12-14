@@ -10,8 +10,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Hylearndraw">
         <activity
-            android:name=".DrawMixModeActivity"
+            android:name=".DownloadingActivity"
             android:exported="true">
+        </activity>
+        <activity android:name=".QuadToPathActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"/>
+        <activity android:name=".DrawMixModeActivity"/>
     </application>
 
 </manifest>

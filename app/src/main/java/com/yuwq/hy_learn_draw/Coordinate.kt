@@ -17,13 +17,12 @@ class Coordinate {
     val axisColor = Color.BLUE
     val gridColor = Color.GRAY
 
-
     fun onDraw(canvas: Canvas, size: Size) {
         canvas.save()
         canvas.translate(size.width / 2, size.height / 2)
         drawGridLine(canvas, size)
         drawAxis(canvas, size)
-        drawText(canvas,size)
+        drawText(canvas, size)
         canvas.restore()
     }
 
@@ -47,10 +46,10 @@ class Coordinate {
         with(canvas) {
             drawLine(-size.width / 2, zero, size.width / 2, zero, gridPaint)
             drawLine(zero, -size.height / 2, zero, size.height / 2, gridPaint)
-            drawLine(zero,size.height/2,0-17f,size.height/2-20,gridPaint)
-            drawLine(zero,size.height/2,0+17f,size.height/2-20,gridPaint)
-            drawLine(size.width/2,zero,size.width/2-20,0-17f,gridPaint);
-            drawLine(size.width/2,zero,size.width/2-20,0+17f,gridPaint);
+            drawLine(zero, size.height / 2, 0 - 17f, size.height / 2 - 20, gridPaint)
+            drawLine(zero, size.height / 2, 0 + 17f, size.height / 2 - 20, gridPaint)
+            drawLine(size.width / 2, zero, size.width / 2 - 20, 0 - 17f, gridPaint);
+            drawLine(size.width / 2, zero, size.width / 2 - 20, 0 + 17f, gridPaint);
         };
     }
 
@@ -65,6 +64,7 @@ class Coordinate {
 
      */
     private fun drawGridLine(canvas: Canvas, size: Size) {
+        gridPath.reset()
         gridPaint.apply {
             strokeWidth = 0.5f
             style = Paint.Style.STROKE
