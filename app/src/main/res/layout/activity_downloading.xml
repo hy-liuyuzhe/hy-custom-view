@@ -3,13 +3,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/holo_blue_light"
+    android:padding="16dp"
     android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/degree"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="success"
         android:id="@+id/btnSuccess"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="fail"
+        android:id="@+id/btnFail"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="degree"
+        android:id="@+id/btnDegree"/>
 
     <com.yuwq.hy_learn_draw.java.DownloadingView
         android:id="@+id/downloading"

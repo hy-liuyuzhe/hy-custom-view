@@ -33,8 +33,9 @@ public class QuadToPathActivity extends AppCompatActivity {
         mQuadToPathView = findViewById(R.id.quadToView);
         mTouchPaints = new ArrayList<>();
         mTouchPaints.add(new TouchPaint(0, 0));
-        mTouchPaints.add(new TouchPaint(100, 100));
-        mTouchPaints.add(new TouchPaint(120, -60));
+        mTouchPaints.add(new TouchPaint(0,80));
+        mTouchPaints.add(new TouchPaint(70, 150));
+        mTouchPaints.add(new TouchPaint(150, 150));
         mQuadToPathView.setQuadToList(mTouchPaints);
         DisplayMetrics outMetrics = new DisplayMetrics();
         WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);

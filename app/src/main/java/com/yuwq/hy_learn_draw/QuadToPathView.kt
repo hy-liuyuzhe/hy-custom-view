@@ -39,7 +39,50 @@ class QuadToPathView @JvmOverloads constructor(
         coordinate.onDraw(canvas, size)
         canvas.translate((width / 2).toFloat(), (height / 2).toFloat());
 
-        points?.let { quadto(canvas, it) }
+        if (points != null && points!!.size > 3) {
+            points?.let { cubicTo(canvas, it) }
+        } else {
+            points?.let { quadto(canvas, it) }
+        }
+    }
+
+    private fun cubicTo(canvas: Canvas, list: List<TouchPaint>) {
+        //offset 触摸时事件也要处理offset
+        val offsetX = 0f
+        val offsetY = 0f
+        val point0X = list[0].x
+        val point0Y = list[0].y
+        val point1X = list[1].x
+        val point1Y = list[1].y
+        val point2X = list[2].x
+        val point2Y = list[2].y
+        val point3X = list[3].x
+        val point3Y = list[3].y
+        paint.color = Color.RED
+        canvas.drawPath(Path().apply {
+            this.moveTo(point0X, point0Y)
+            this.cubicTo(point1X, point1Y, point2X, point2Y, point3X, point3Y)
+            this.offset(offsetX, offsetY)
+        }, paint)
+        paint.color = Color.GREEN
+        val path = Path().also { it.moveTo(point0X, point0Y) }
+        path.lineTo(point1X, point1Y)
+        path.lineTo(point2X, point2Y)
+        path.lineTo(point3X, point3Y)
+        path.offset(offsetX, offsetY)
+        canvas.drawPath(path, paint)
+        canvas.save()
+        canvas.translate(offsetX,offsetY)
+        canvas.drawPoints(
+            floatArrayOf(point0X, point0Y, point1X, point1Y, point2X, point2Y, point3X, point3Y),
+
+            Paint().apply {
+                strokeWidth = 13f
+                style = Paint.Style.FILL
+                strokeCap = Paint.Cap.ROUND
+                color = Color.YELLOW
+            })
+        canvas.save()
     }
 
     private fun quadto(canvas: Canvas, list: List<TouchPaint>) {

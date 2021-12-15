@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +31,10 @@ public class DownloadingActivity extends AppCompatActivity {
         DownloadingView downloading = findViewById(R.id.downloading);
         findViewById(R.id.btnSuccess).setOnClickListener(v -> {
             downloading.performAnimation();
+        });
+        findViewById(R.id.btnDegree).setOnClickListener(v -> {
+            downloading.setTestDegree(((EditText)findViewById(R.id.degree)).getText().toString());
+            downloading.invalidate();
         });
     }
 
