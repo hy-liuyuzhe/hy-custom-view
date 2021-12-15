@@ -15,7 +15,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
@@ -34,9 +33,12 @@ public class DownloadingView extends View {
     private static final int STATE_BEFORE_PROGRESS_CIRCLE_SCALE = 1;
     private static final int STATE_BEFORE_PROGRESS_INNER_CIRCLE_SCALE = 2;
     private static final int STATE_BEFORE_PROGRESS_CIRCLE_TO_LINE = 3;
+    private static final int STATE_BEFORE_PROGRESS_ARROW_MOVE_LINE_OSCILLATION = 4;
 
-    private static final long BEFORE_PROGRESS_CIRCLE_SCALE_DURATION = 1450;
-    private static final long BEFORE_PROGRESS_CIRCLE_TO_LINE_DURATION = 1150;
+    private static final float DEFAULT_LINE_OSCILLATION_MAX_HEIGHT_RATIO = 0.15f;
+    private static final long BEFORE_PROGRESS_ARROW_MOVE_AND_LINE_OSCILL = 800;
+    private static final long BEFORE_PROGRESS_CIRCLE_SCALE_DURATION = 450;
+    private static final long BEFORE_PROGRESS_CIRCLE_TO_LINE_DURATION = 150;
     public static final double MAX_LINE_WIDTH_FACTOR = 3.45;
     public static final double SUGGEST_X_AXIS_PADDING_TO_CIRCLE_DIAMETER_RATIO = 0.75;
     public static final double DEFAULT_ARROW_MOVE_MAX_HEIGHT_TO_CIRCLE_DIAMETER_RATIO = 1.975;
@@ -101,6 +103,16 @@ public class DownloadingView extends View {
     private int mLastArrowOffsetY;
     private Matrix mArrowRotateMatrix;
     private float mDegress;
+    private int mBaseLineLen;
+    private int mHalfBaseLineLen;
+    private int mBaseLineX;
+    private int mBaseLineY;
+    private int mBaseLineCenterX;
+    private ValueAnimator mBFPArrowMoveAnimator;
+    private float mBFPArrowMoveFactor;
+    private ValueAnimator mBFPLineOscillateAnimator;
+    private float mBFPLineOscillateFactor;
+    private Path mOscillationPath;
 
 
     public DownloadingView(Context context, @Nullable AttributeSet attrs) {
@@ -154,6 +166,12 @@ public class DownloadingView extends View {
         mEndArrowRectHeight = (int) (mCircleRadius * DEFAULT_END_ARROW_RECT_HEIGHT_TO_CIRCLE_RADIUS_RATIO);
         mArrowRectF.set(mCircleRectF);
         mBaseLinePaint.setStrokeWidth(dipToPx(2));
+        mBaseLineLen = (int) (mCircleDiameter * MAX_LINE_WIDTH_FACTOR);
+        mHalfBaseLineLen = mBaseLineLen / 2;
+        //line leftmost left and top
+        mBaseLineX = mLoadingViewCenterX - mHalfBaseLineLen;
+        mBaseLineY = (int) (mLoadingViewCenterY - mBaseLinePaint.getStrokeWidth() / 2);
+        mBaseLineCenterX = mLoadingViewCenterX;
 
         mDefaultPaint.setPathEffect(new CornerPathEffect(mInitArrowJointConnerRadius));
     }
@@ -171,8 +189,31 @@ public class DownloadingView extends View {
             case STATE_BEFORE_PROGRESS_CIRCLE_TO_LINE:
                 drawBeforeProgressCircleToLine(canvas, mBFPCircleToLineFactor);
                 break;
+            case STATE_BEFORE_PROGRESS_ARROW_MOVE_LINE_OSCILLATION:
+                drawBeforeProgressArrowModeAndLineOscillation(canvas, mBFPArrowMoveFactor, mBFPLineOscillateFactor);
+                break;
             default:
         }
+    }
+
+    private void drawBeforeProgressArrowModeAndLineOscillation(Canvas canvas, float arrowMoveFactor, float lineOscillateFactor) {
+
+        int maxHeightPointOfLineOscillate = (int) (mBaseLineLen * DEFAULT_LINE_OSCILLATION_MAX_HEIGHT_RATIO);
+        updateLineOscillationPath(lineOscillateFactor, mBaseLineLen, mBaseLineX, mBaseLineY, maxHeightPointOfLineOscillate, mHalfBaseLineLen);
+        canvas.drawPath(mOscillationPath, mBaseLinePaint);
+    }
+
+    private void updateLineOscillationPath(float oscillateFactor, int baseLineLen, int baseLineX, int baseLineY, int highestPointHeight, int halfBaseLineLen) {
+        if (mOscillationPath == null) {
+            mOscillationPath = new Path();
+        } else {
+            mOscillationPath.reset();
+        }
+
+        highestPointHeight *= oscillateFactor;
+
+        mOscillationPath.moveTo(baseLineX, baseLineY);
+        mOscillationPath.quadTo(baseLineX + halfBaseLineLen, baseLineY - 2f * highestPointHeight, baseLineX + baseLineLen, baseLineY);
     }
 
     private void drawBeforeProgressCircleToLine(Canvas canvas, float percentTime) {
@@ -232,7 +273,6 @@ public class DownloadingView extends View {
             adjustNormalizedTime = (percentTime - CIRCLE_TO_LINE_SEASONS[2]) / (CIRCLE_TO_LINE_SEASONS[3] - CIRCLE_TO_LINE_SEASONS[2]);
         }
 
-        Log.d("liuyuzhe", "updateCircleToLinePath: "+adjustNormalizedTime);
 
         //the path bounds width
         float boundWidthPercent = ((CIRCLE_TO_LINE_WIDTH_FACTOR[index + 1] - CIRCLE_TO_LINE_WIDTH_FACTOR[index])
@@ -376,6 +416,7 @@ public class DownloadingView extends View {
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 mCurrentState = STATE_BEFORE_PROGRESS_INNER_CIRCLE_SCALE;
+                invalidate();
             }
         });
         mAnimatorList.add(mBFPInnerCircleScaleAnimator);
@@ -398,13 +439,48 @@ public class DownloadingView extends View {
         mBFPCircleToLineAnimator.setDuration(BEFORE_PROGRESS_CIRCLE_TO_LINE_DURATION);
         mAnimatorList.add(mBFPCircleToLineAnimator);
 
+        mBFPArrowMoveAnimator = ValueAnimator.ofFloat(0, 1f);
+        mBFPArrowMoveAnimator.addUpdateListener(animation -> {
+            mBFPArrowMoveFactor = (float) animation.getAnimatedValue();
+            invalidate();
+        });
+        mBFPArrowMoveAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                mCurrentState = STATE_BEFORE_PROGRESS_ARROW_MOVE_LINE_OSCILLATION;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                performProgressAnimation();
+            }
+        });
+        mBFPArrowMoveAnimator.setDuration(BEFORE_PROGRESS_ARROW_MOVE_AND_LINE_OSCILL);
+        mAnimatorList.add(mBFPArrowMoveAnimator);
+
+        //line oscillation
+        mBFPLineOscillateAnimator = ValueAnimator.ofFloat(0, 1, -0.5f, 0.25f, -0.125f, 0);
+        mBFPLineOscillateAnimator.addUpdateListener(animation -> mBFPLineOscillateFactor = (float) animation.getAnimatedValue());
+        mBFPLineOscillateAnimator.setDuration(BEFORE_PROGRESS_ARROW_MOVE_AND_LINE_OSCILL);
+
+        AnimatorSet arrowAndLineOscaillateSet = new AnimatorSet();
+        arrowAndLineOscaillateSet.playTogether(mBFPLineOscillateAnimator, mBFPArrowMoveAnimator);
+
+        mAnimatorList.add(arrowAndLineOscaillateSet);
+
         AnimatorSet animatorSet = new AnimatorSet();
 
-        animatorSet.playSequentially(mBFPCircleScaleAnimator, mBFPCircleToLineAnimator);
+        animatorSet.playSequentially(mBFPCircleScaleAnimator, mBFPCircleToLineAnimator, arrowAndLineOscaillateSet);
         animatorSet.playTogether(mBFPInnerCircleScaleAnimator);
         animatorSet.setInterpolator(new LinearInterpolator());
         mAnimatorList.add(animatorSet);
         animatorSet.start();
+    }
+
+    private void performProgressAnimation() {
+
     }
 
     private void releaseAnimation() {
