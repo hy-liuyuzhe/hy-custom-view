@@ -203,6 +203,12 @@ public class DownloadingView extends View {
         canvas.drawPath(mOscillationPath, mBaseLinePaint);
     }
 
+    /**
+     * this method use three point
+     * first point: baseLineX, baseLineY
+     * second point: baseLineX + baseLineLen, baseLineY
+     * third point: baseLineX + halfBaseLineLen, baseLineY - 2f * highestPointHeight; it would be changed by oscillateFactor
+     */
     private void updateLineOscillationPath(float oscillateFactor, int baseLineLen, int baseLineX, int baseLineY, int highestPointHeight, int halfBaseLineLen) {
         if (mOscillationPath == null) {
             mOscillationPath = new Path();
@@ -241,6 +247,7 @@ public class DownloadingView extends View {
         drawArrowTrans(canvas, mLastArrowOffsetX, mLastArrowOffsetY, 0);
     }
 
+    //fixed location and draw arrow
     private void drawArrowTrans(Canvas canvas, int offsetX, int offsetY, int rotateAngle) {
         canvas.save();
         if (mArrowRotateMatrix == null) {
