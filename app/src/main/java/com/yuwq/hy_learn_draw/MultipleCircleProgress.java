@@ -20,7 +20,7 @@ public class MultipleCircleProgress extends View {
 
     public static final int CIRCLE_MARGIN_LEFT_SIZE = 20;
     public static final int CIRCLE_MARGIN_RIGHT_SIZE = 20;
-    public static final String INIT_STATE_LINE_COLOR = "#F5F5F5";
+    public static final String INIT_STATE_LINE_COLOR = "#EEEEEE";
     public static final String PROGRESS_STATE_LINE_COLOR = "#52AEFF";
     public static final boolean Debug = true;
     public static final int OFFSET = 2;
@@ -65,7 +65,7 @@ public class MultipleCircleProgress extends View {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         mBasePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBasePaint.setColor(Color.parseColor("#F5F5F5"));
+        mBasePaint.setColor(Color.parseColor(INIT_STATE_LINE_COLOR));
 
         mSuccessCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
