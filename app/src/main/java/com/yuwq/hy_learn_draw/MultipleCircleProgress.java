@@ -7,8 +7,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -22,7 +22,6 @@ public class MultipleCircleProgress extends View {
     public static final int CIRCLE_MARGIN_RIGHT_SIZE = 20;
     public static final String INIT_STATE_LINE_COLOR = "#EEEEEE";
     public static final String PROGRESS_STATE_LINE_COLOR = "#52AEFF";
-    public static final boolean Debug = true;
     public static final int OFFSET = 2;
     public static final String SUCCESS_INNER_COLOR = "#52AEFF";
     public static final String FAIL_INNER_COLOR = "#FF4040";
@@ -30,19 +29,25 @@ public class MultipleCircleProgress extends View {
     public static final String FAIL_MIDDLE_COLOR = "#CCFF8585";
     public static final String SUCCESS_OUTER_COLOR = "#66BADFFF";
     public static final String FAIL_OUTER_COLOR = "#66FFB6B6";
+    public static final String DEFAULT_TEXT_COLOR = "#333333";
+
     private CircleProgressStageEnum mStageEnum;
     private CircleStateEnum mCircleStateEnum;
-    private Paint mBasePaint;
-    private RectF mInitCircleFirstRectF;
+
     private LayerCircle mInitCircleLayer;
-    private int mCircleCenterY;
-    private int mCircleCenterX;
-    private RectF mInitCircleSecondRectF;
-    private RectF mInitCircleThirdRectF;
-    private Paint mLinePaint;
     private LayerCircle mOuterCircleLayer;
     private LayerCircle mMiddleCircleLayer;
     private LayerCircle mInnerCircleLayer;
+
+    private int mCircleCenterY;
+    private int mCircleCenterX;
+
+    private RectF mInitCircleFirstRectF;
+    private RectF mInitCircleSecondRectF;
+    private RectF mInitCircleThirdRectF;
+
+    private Paint mBasePaint;
+    private Paint mLinePaint;
     private Paint mSuccessCirclePaint;
     private Paint mSuccessAndFailSignPaint;
 
@@ -61,8 +66,8 @@ public class MultipleCircleProgress extends View {
     }
 
     private void init() {
-        mStageEnum = CircleProgressStageEnum.init;
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        mStageEnum = CircleProgressStageEnum.init;
 
         mBasePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBasePaint.setColor(Color.parseColor(INIT_STATE_LINE_COLOR));
@@ -106,10 +111,6 @@ public class MultipleCircleProgress extends View {
         mInitCircleThirdRectF = new RectF();
         mInitCircleThirdRectF.set(0, 0, initCircleDiameter, initCircleDiameter);
         mInitCircleThirdRectF.offsetTo(width - initCircleDiameter - dipToPx(CIRCLE_MARGIN_RIGHT_SIZE), mCircleCenterY - mInitCircleLayer.radius);
-
-
-        //叉子
-        //对号
     }
 
     @Override
@@ -120,6 +121,15 @@ public class MultipleCircleProgress extends View {
         drawFirstCircle(canvas);
         drawSecondCircle(canvas);
         drawThirdCircle(canvas);
+    }
+
+    private void drawText(Canvas canvas, String text, String color, RectF rectF) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.parseColor(color));
+        paint.setTextSize(dipToPx(11));
+        float w = paint.measureText(text, 0, text.length());
+
+        canvas.drawText(text, rectF.centerX() - w / 2, rectF.centerY() + rectF.height() + dipToPx(8), paint);
     }
 
     private void drawSecondLine(Canvas canvas) {
@@ -151,6 +161,7 @@ public class MultipleCircleProgress extends View {
 
     private void drawThirdCircle(Canvas canvas) {
         RectF thirdRectF = mInitCircleThirdRectF;
+        String textColor = "";
         if (mStageEnum == CircleProgressStageEnum.third) {
             if (mCircleStateEnum == CircleStateEnum.success) {
                 updateCircleColor(CircleStateEnum.success);
@@ -167,11 +178,14 @@ public class MultipleCircleProgress extends View {
             }
         } else {
             drawInitCircle(canvas, mInitCircleThirdRectF);
+            textColor = DEFAULT_TEXT_COLOR;
         }
+        drawText(canvas, "绑定", TextUtils.isEmpty(textColor) ? mInnerCircleLayer.color : textColor, mInitCircleThirdRectF);
     }
 
     private void drawSecondCircle(Canvas canvas) {
         final RectF secondRectF = mInitCircleSecondRectF;
+        String textColor = "";
         if (mStageEnum == CircleProgressStageEnum.second && mCircleStateEnum == CircleStateEnum.failed) {
             updateCircleColor(CircleStateEnum.failed);
             drawHasStateCircle(canvas, mOuterCircleLayer, secondRectF);
@@ -187,7 +201,9 @@ public class MultipleCircleProgress extends View {
             drawSuccessSign(canvas, secondRectF);
         } else {
             drawInitCircle(canvas, secondRectF);
+            textColor = DEFAULT_TEXT_COLOR;
         }
+        drawText(canvas, "扫RFID条码", TextUtils.isEmpty(textColor) ? mInnerCircleLayer.color : textColor, secondRectF);
     }
 
     private void drawFirstCircle(Canvas canvas) {
@@ -206,6 +222,8 @@ public class MultipleCircleProgress extends View {
             drawHasStateCircle(canvas, mInnerCircleLayer, mInitCircleFirstRectF);
             drawSuccessSign(canvas, mInitCircleFirstRectF);
         }
+        String textColor = mStageEnum == CircleProgressStageEnum.init ? DEFAULT_TEXT_COLOR : mInnerCircleLayer.color;
+        drawText(canvas, "扫商品条码", textColor, mInitCircleFirstRectF);
     }
 
     private void drawFailedSign(Canvas canvas, RectF rectF) {
