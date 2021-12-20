@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -30,6 +31,8 @@ public class MultipleCircleProgress extends View {
     public static final String SUCCESS_OUTER_COLOR = "#66BADFFF";
     public static final String FAIL_OUTER_COLOR = "#66FFB6B6";
     public static final String DEFAULT_TEXT_COLOR = "#333333";
+    public static final String SECOND_TEXT_TIP = "扫RFID条码";
+    public static final int TEXT_MARGIN_TOP_OFFSET = 8;
 
     private CircleProgressStageEnum mStageEnum;
     private CircleStateEnum mCircleStateEnum;
@@ -50,6 +53,8 @@ public class MultipleCircleProgress extends View {
     private Paint mLinePaint;
     private Paint mSuccessCirclePaint;
     private Paint mSuccessAndFailSignPaint;
+    private Paint mTextPaint;
+    private int mTextHeight;
 
     public MultipleCircleProgress(Context context) {
         this(context, null);
@@ -78,6 +83,12 @@ public class MultipleCircleProgress extends View {
         mLinePaint.setStyle(Paint.Style.FILL);
         mLinePaint.setStrokeWidth(dipToPx(3f));
 
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setTextSize(dipToPx(11));
+        Rect bounds = new Rect();
+        mTextPaint.getTextBounds(SECOND_TEXT_TIP, 0, SECOND_TEXT_TIP.length(), bounds);
+        mTextHeight = bounds.height();
+
         mSuccessAndFailSignPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mSuccessAndFailSignPaint.setStrokeCap(Paint.Cap.ROUND);
         mSuccessAndFailSignPaint.setStyle(Paint.Style.STROKE);
@@ -94,9 +105,10 @@ public class MultipleCircleProgress extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         int width = w - getPaddingLeft() - getPaddingRight();
+        int height = h - getPaddingTop() - getPaddingBottom();
+
         mCircleCenterX = width / 2;
-        //todo 字留空间
-        mCircleCenterY = (h) / 2;
+        mCircleCenterY = height / 2 - (mTextHeight + dipToPx(TEXT_MARGIN_TOP_OFFSET)) / 2;
         //16 20 24
         int initCircleDiameter = mInitCircleLayer.radius * 2;
 
@@ -124,12 +136,9 @@ public class MultipleCircleProgress extends View {
     }
 
     private void drawText(Canvas canvas, String text, String color, RectF rectF) {
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.parseColor(color));
-        paint.setTextSize(dipToPx(11));
-        float w = paint.measureText(text, 0, text.length());
-
-        canvas.drawText(text, rectF.centerX() - w / 2, rectF.centerY() + rectF.height() + dipToPx(8), paint);
+        mTextPaint.setColor(Color.parseColor(color));
+        float w = mTextPaint.measureText(text, 0, text.length());
+        canvas.drawText(text, rectF.centerX() - w / 2, rectF.centerY() + rectF.height() + dipToPx(TEXT_MARGIN_TOP_OFFSET), mTextPaint);
     }
 
     private void drawSecondLine(Canvas canvas) {
@@ -203,7 +212,7 @@ public class MultipleCircleProgress extends View {
             drawInitCircle(canvas, secondRectF);
             textColor = DEFAULT_TEXT_COLOR;
         }
-        drawText(canvas, "扫RFID条码", TextUtils.isEmpty(textColor) ? mInnerCircleLayer.color : textColor, secondRectF);
+        drawText(canvas, SECOND_TEXT_TIP, TextUtils.isEmpty(textColor) ? mInnerCircleLayer.color : textColor, secondRectF);
     }
 
     private void drawFirstCircle(Canvas canvas) {
