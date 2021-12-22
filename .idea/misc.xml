@@ -8,7 +8,9 @@
         <entry key="app/src/main/res/layout/activity_draw_mix_mode.xml" value="0.396875" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.30446194225721784" />
         <entry key="app/src/main/res/layout/activity_quadto_path.xml" value="0.22864583333333333" />
+        <entry key="app/src/main/res/layout/activity_roll_text.xml" value="0.396875" />
         <entry key="app/src/main/res/layout/activity_scan_progress.xml" value="0.37864583333333335" />
+        <entry key="app/src/main/res/layout/layout_roll_number.xml" value="0.396875" />
       </map>
     </option>
   </component>
