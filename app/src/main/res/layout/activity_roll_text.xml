@@ -36,5 +36,11 @@
         android:onClick="plus"
         android:text="plus" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="plus2"
+        android:text="plus2" />
+
 
 </LinearLayout>
