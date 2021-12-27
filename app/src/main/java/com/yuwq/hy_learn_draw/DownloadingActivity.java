@@ -1,6 +1,7 @@
 package com.yuwq.hy_learn_draw;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -33,8 +34,7 @@ public class DownloadingActivity extends AppCompatActivity {
             downloading.performAnimation();
         });
         findViewById(R.id.btnDegree).setOnClickListener(v -> {
-            downloading.setTestDegree(((EditText)findViewById(R.id.degree)).getText().toString());
-            downloading.invalidate();
+            startActivity(new Intent(this,QuadToPathActivity.class));
         });
     }
 

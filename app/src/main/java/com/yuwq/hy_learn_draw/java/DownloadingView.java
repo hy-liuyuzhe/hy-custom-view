@@ -21,6 +21,8 @@ import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.Nullable;
 
+import com.yuwq.hy_learn_draw.Coordinate;
+
 import java.util.ArrayList;
 
 /**
@@ -28,6 +30,7 @@ import java.util.ArrayList;
  */
 public class DownloadingView extends View {
 
+    private static final float CHANGE_ARROW_TO_DIALOG_BOUNCE_TIME = 0.625f;
     //animation state
     private int mCurrentState = 0;
     private static final int STATE_BEFORE_PROGRESS_CIRCLE_SCALE = 1;
@@ -38,7 +41,7 @@ public class DownloadingView extends View {
     private static final float DEFAULT_LINE_OSCILLATION_MAX_HEIGHT_RATIO = 0.15f;
     private static final long BEFORE_PROGRESS_ARROW_MOVE_AND_LINE_OSCILL = 800;
     private static final long BEFORE_PROGRESS_CIRCLE_SCALE_DURATION = 450;
-    private static final long BEFORE_PROGRESS_CIRCLE_TO_LINE_DURATION = 150;
+    private static final long BEFORE_PROGRESS_CIRCLE_TO_LINE_DURATION = 1150;
     public static final double MAX_LINE_WIDTH_FACTOR = 3.45;
     public static final double SUGGEST_X_AXIS_PADDING_TO_CIRCLE_DIAMETER_RATIO = 0.75;
     public static final double DEFAULT_ARROW_MOVE_MAX_HEIGHT_TO_CIRCLE_DIAMETER_RATIO = 1.975;
@@ -113,7 +116,12 @@ public class DownloadingView extends View {
     private ValueAnimator mBFPLineOscillateAnimator;
     private float mBFPLineOscillateFactor;
     private Path mOscillationPath;
-
+    private Coordinate.Size mSize;
+    private final Coordinate mCoordinate = new Coordinate();
+    private final float[] mChangeArrowToDialogParameters = new float[5];
+    private float change_arrow_to_dialog_bounce_time = 0.625f;
+    private float default_end_arrow_rect_width_to_circle_radius_ratio = 1f;
+    private float default_init_arrow_rect_width_to_circle_radius_time = 0.5f;
 
     public DownloadingView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
@@ -149,6 +157,7 @@ public class DownloadingView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        mSize = new Coordinate.Size(w, h);
         mLoadingViewCenterX = w / 2;
         mLoadingViewCenterY = h / 2;
         mCircleDiameter = (int) Math.min((w / (MAX_LINE_WIDTH_FACTOR + SUGGEST_X_AXIS_PADDING_TO_CIRCLE_DIAMETER_RATIO)),
@@ -176,9 +185,11 @@ public class DownloadingView extends View {
         mDefaultPaint.setPathEffect(new CornerPathEffect(mInitArrowJointConnerRadius));
     }
 
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        mCoordinate.onDraw(canvas, mSize);
         switch (mCurrentState) {
             case STATE_BEFORE_PROGRESS_CIRCLE_SCALE:
                 drawCircleAndArrowScale(canvas, mBFPCircleScalingFactor);
@@ -196,11 +207,32 @@ public class DownloadingView extends View {
         }
     }
 
-    private void drawBeforeProgressArrowModeAndLineOscillation(Canvas canvas, float arrowMoveFactor, float lineOscillateFactor) {
+    private void drawBeforeProgressArrowModeAndLineOscillation(Canvas canvas, float normalizeTime, float lineOscillateFactor) {
+
+        updateArrowToDialogParameters(mChangeArrowToDialogParameters, normalizeTime);
+
+        int maxMovePathHeight = (int) (DEFAULT_ARROW_MOVE_MAX_HEIGHT_TO_CIRCLE_DIAMETER_RATIO * mCircleDiameter);
+        updateArrowMovePoint(normalizeTime, CHANGE_ARROW_TO_DIALOG_BOUNCE_TIME, mHalfBaseLineLen, maxMovePathHeight,
+                mLoadingViewCenterX - mHalfBaseLineLen, mLoadingViewCenterY - maxMovePathHeight);
 
         int maxHeightPointOfLineOscillate = (int) (mBaseLineLen * DEFAULT_LINE_OSCILLATION_MAX_HEIGHT_RATIO);
         updateLineOscillationPath(lineOscillateFactor, mBaseLineLen, mBaseLineX, mBaseLineY, maxHeightPointOfLineOscillate, mHalfBaseLineLen);
         canvas.drawPath(mOscillationPath, mBaseLinePaint);
+    }
+
+    private void updateArrowToDialogParameters(float[] parameters, float normalizeTime) {
+        if (parameters == null) return;
+
+        //rect width
+        if (normalizeTime <= change_arrow_to_dialog_bounce_time) {
+            parameters[0] = (default_end_arrow_rect_width_to_circle_radius_ratio - default_init_arrow_rect_width_to_circle_radius_time)
+                    * normalizeTime / change_arrow_to_dialog_bounce_time
+                    + default_init_arrow_rect_width_to_circle_radius_time;
+        }
+    }
+
+    private void updateArrowMovePoint(float normalizeTime, float bounceTime, int halfBaseLineLen, int maxMovePathHeight, int left, int top) {
+
     }
 
     /**
